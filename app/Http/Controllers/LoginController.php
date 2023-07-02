@@ -9,6 +9,11 @@ class LoginController extends Controller
 {
     public function index()
     {
+        if(Auth()->user()) 
+        {
+            return redirect('/dashboard');
+        }
+
         return view('auth.login', [
             'title' => 'Login'
         ]);

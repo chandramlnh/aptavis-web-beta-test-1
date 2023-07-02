@@ -15,14 +15,13 @@ use App\Http\Controllers\LoginController;
 */
 
 Route::get('/', function () {
-    return redirect('login');
+    return redirect('/login');
 });
-
  
 Route::get('/dashboard', function () {
     return view('welcome');
 });
  
-Route::get('/login', [LoginController::class, 'index'])->name('login')->middleware('guest');
+Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'authenticate']);
 Route::post('/logout', [LoginController::class, 'logout']);
