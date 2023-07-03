@@ -18,9 +18,17 @@ use App\Http\Controllers\LoginController;
 //     return redirect('/login');
 // });
  
-Route::get('/',function(){
-    return view('home');
-});
+Route::get('/clubs',function(){
+    return view('club');
+})->name("club");
+
+Route::get('/input-score',function(){
+    return view('input-score');
+})->name("input-score");
+
+Route::get('/standings',function(){
+    return view('standings');
+})->name("standings");
 
 Route::get('/dashboard', function () {
     return view('welcome');
