@@ -9,10 +9,6 @@ class Club extends Component
 {
     public $clubs, $club_name, $club_city, $clubId, $update = false, $add = false;
  
-    protected $listeners = [
-        'deleteListner'=>'delete'
-    ];
- 
     protected $rules = [
         'club_name' => 'required|unique:clubs',
         'club_city' => 'required'
@@ -21,6 +17,13 @@ class Club extends Component
     public function resetFields(){
         $this->club_name = '';
         $this->club_city = '';
+    }
+ 
+    public function cancel()
+    {
+        $this->add = false;
+        $this->update = false;
+        $this->resetFields();
     }
  
     public function render()
@@ -84,13 +87,6 @@ class Club extends Component
         } catch (\Exception $ex) {
             session()->flash('success','Something goes wrong!!');
         }
-    }
- 
-    public function cancel()
-    {
-        $this->add = false;
-        $this->update = false;
-        $this->resetFields();
     }
 
     public function delete($id)

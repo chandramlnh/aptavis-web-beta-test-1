@@ -3,7 +3,7 @@
 @section("nav")
     <a class="nav-link" href="{{ route('club') }}">Clubs</a>
     <a class="nav-link active">Input Score</a>
-    <a class="nav-link" href="{{ route('standings') }}">standings</a>
+    <a class="nav-link" href="{{ route('standings') }}">Standings</a>
 @endsection
 
 @section("content")
