@@ -120,14 +120,57 @@ class InputScore extends Component
 
     public function validateAddMultiple()
     {
-        $validatedData = $this->validate([
-            'newMatch.*.club_home_id' => 'required|distinct',
-            'newMatch.*.club_away_id' => 'required|distinct|different:newMatch.*.club_home_id',
-            'newMatch.*.club_home_score' => 'required|numeric',
-            'newMatch.*.club_away_score' => 'required|numeric',
+        $rules = [];
+
+        foreach ($this->newMatch as $index => $match) {
+            $rules["newMatch.{$index}.club_home_id"] = 'required|distinct|not_in:'.$this->getClubMatches($match['club_away_id']);
+            $rules["newMatch.{$index}.club_away_id"] = 'required|distinct|different:newMatch.'.$index.'.club_home_id|not_in:'.$this->getClubMatches($match['club_home_id']);
+
+            for ($i = 0; $i < $index; $i++) {
+                $rules["newMatch.{$index}.club_home_id"] .= '|different:newMatch.'.$i.'.club_home_id,newMatch.'.$i.'.club_away_id';
+                $rules["newMatch.{$index}.club_away_id"] .= '|different:newMatch.'.$i.'.club_home_id,newMatch.'.$i.'.club_away_id';
+            }
+        }
+
+        $rules["newMatch.*.club_home_score"] = 'required|numeric';
+        $rules["newMatch.*.club_away_score"] = 'required|numeric';
+
+        $validatedData =  $this->validate($rules, [
+            'newMatch.*.club_home_id.required' => 'The Home Club is required.',
+            'newMatch.*.club_home_id.distinct' => 'The Home Club cannot be the same.',
+            'newMatch.*.club_home_id.different' => 'The Home Club must be different from the Away Club.',
+            'newMatch.*.club_home_id.not_in' => 'The Home Club have met in previous fixtures.',
+            'newMatch.*.club_away_id.required' => 'The Away Club is required.',
+            'newMatch.*.club_away_id.distinct' => 'The Away Club cannot be the same.',
+            'newMatch.*.club_away_id.different' => 'The Away Club must be different from the Home Club.',
+            'newMatch.*.club_away_id.not_in' => 'The Away Club have met in previous clashes.',
+            'newMatch.*.club_home_score.required' => 'The Home Club is required.',
+            'newMatch.*.club_away_score.required' => 'The Away Club is required.',
+            'newMatch.*.club_home_score.numeric' => 'The Home Score field validation must have a numeric value.',
+            'newMatch.*.club_away_score.numeric' => 'The Away Score field validation must have a numeric value.',
         ]);
 
         return $validatedData;
+    }
+
+    private function getClubMatches($clubId)
+    {
+        $matches = Matches::where('club_home_id', $clubId)
+                    ->orWhere('club_away_id', $clubId)
+                    ->get();
+
+        $clubMatches = $matches->flatMap(function ($match) use ($clubId) {
+            return [
+                $match->club_home_id,
+                $match->club_away_id,
+            ];
+        });
+
+        $clubMatches = $clubMatches->reject(function ($match) use ($clubId) {
+            return $match == $clubId;
+        });
+
+        return $clubMatches->implode(',');
     }
 
     public function addMultiple()
@@ -153,18 +196,12 @@ class InputScore extends Component
     public function storeMultiple()
     {
         $this->validateAddMultiple();
-        try {
-            foreach ($this->newMatch as $match) {
-                Matches::create($match);
-            }
-            $this->newMatch = [];
-            session()->flash('success','Created Successfully!!');
-            $this->resetFields();
-            $this->add = false;
-            $this->addMultiple = false;
-        } catch (\Exception $ex) {
-            session()->flash('error','Something goes wrong!!');
+        foreach ($this->newMatch as $match) {
+            Matches::create($match);
         }
+        $this->newMatch = [];
+        $this->add = false;
+        $this->addMultiple = false;
     }
 
     public function removeMatch($index)
