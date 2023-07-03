@@ -14,10 +14,14 @@ use App\Http\Controllers\LoginController;
 |
 */
 
-Route::get('/', function () {
-    return redirect('/login');
-});
+// Route::get('/', function () {
+//     return redirect('/login');
+// });
  
+Route::get('/',function(){
+    return view('home');
+});
+
 Route::get('/dashboard', function () {
     return view('welcome');
 });
