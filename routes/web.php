@@ -14,9 +14,9 @@ use App\Http\Controllers\LoginController;
 |
 */
 
-// Route::get('/', function () {
-//     return redirect('/login');
-// });
+Route::get('/', function () {
+    return redirect('/clubs');
+});
  
 Route::get('/clubs',function(){
     return view('club');
